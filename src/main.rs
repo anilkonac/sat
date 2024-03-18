@@ -10,23 +10,37 @@ async fn main() {
 
     let screen_center = vec2(screen_width(), screen_height()) / 2.0;
 
-    let vec_rect1 = vec![vec2(0.0, -30.0), vec2(-30.0, 30.0), vec2(30.0, 30.0)];
+    let vec_rect1 = vec![vec2(0.0, -50.0), vec2(-50.0, 50.0), vec2(50.0, 50.0)];
     let vec_rect2 = vec![
-        screen_center + vec2(0.0, -30.0),
-        screen_center + vec2(-30.0, 30.0),
-        screen_center + vec2(30.0, 30.0),
+        screen_center + vec_rect1[0],
+        screen_center + vec_rect1[1],
+        screen_center + vec_rect1[2],
     ];
 
     triangle2.bounding_polygon(&vec_rect2);
+
+    let mut rotation: f32 = 0.0;
+    let rot_velocity = f32::to_radians(5.0);
 
     loop {
         clear_background(BLACK);
 
         let mouse_pos = Vec2::from(mouse_position());
 
-        let v1 = vec_rect1[0] + mouse_pos;
-        let v2 = vec_rect1[1] + mouse_pos;
-        let v3 = vec_rect1[2] + mouse_pos;
+        let mouse_wheel = mouse_wheel().1;
+        if mouse_wheel > 0.0 {
+            rotation += rot_velocity;
+        } else if mouse_wheel < 0.0 {
+            rotation -= rot_velocity;
+        }
+        let rot_vec = Vec2::from_angle(rotation);
+
+        let v1 = vec_rect1[0];
+        let v2 = vec_rect1[1];
+        let v3 = vec_rect1[2];
+        let v1 = rot_vec.rotate(v1) + mouse_pos;
+        let v2 = rot_vec.rotate(v2) + mouse_pos;
+        let v3 = rot_vec.rotate(v3) + mouse_pos;
         triangle1.bounding_polygon(&vec![v1, v2, v3]);
 
         let collides = collides(&triangle1, &triangle2);
@@ -34,6 +48,14 @@ async fn main() {
 
         draw_triangle(v1, v2, v3, color);
         draw_triangle(vec_rect2[0], vec_rect2[1], vec_rect2[2], color);
+
+        draw_text(
+            "Use mouse wheel to rotate the triangle",
+            screen_width() / 2.0 - 200.0,
+            screen_height() - 40.0,
+            24.0,
+            WHITE,
+        );
 
         next_frame().await
     }
