@@ -140,7 +140,20 @@ fn collides(p1: &BoundingPolygon, p2: &BoundingPolygon) -> bool {
         // Test for seperation (as soon as we find a seperating axis
         // we know there is no possibility of collision, so we can
         // exit early
-        if mm1.max < mm2.min || mm2.max < mm1.min {
+        if (mm1.max < mm2.min) || (mm2.max < mm1.min) {
+            return false;
+        }
+    }
+    // Repeat for the second polygon's normals
+    for normal in &p2.normals {
+        // Determine the minimum and maximum projection
+        // for both polygons
+        let mm1 = find_max_min_projection(p1, *normal);
+        let mm2 = find_max_min_projection(p2, *normal);
+        // Test for seperation (as soon as we find a seperating axis
+        // we know there is no possibility of collision, so we can
+        // exit early
+        if (mm1.max < mm2.min) || (mm2.max < mm1.min) {
             return false;
         }
     }
